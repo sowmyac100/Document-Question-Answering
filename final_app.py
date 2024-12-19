@@ -1,3 +1,14 @@
+The RAG pipeline works like this:
+1.	User Query → Embed Query.
+2.	Similarity Search → Retrieve top-k chunks from the vector database.
+3.	Augment Query → Combine user query + retrieved chunks.
+4.	Generation → Pass augmented input to the LLM.
+5.	Output → Generate and return the response.
+
+
+
+
+
 import streamlit as st
 import os 
 from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings, ChatNVIDIA
