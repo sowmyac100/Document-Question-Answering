@@ -9,23 +9,28 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain.chains import create_retrieval_chain
 from langchain_community.vectorstores import FAISS
 from dotenv import load_dotenv
+import torch
 
 load_dotenv()
 
 # Load the NVIDIA API Key
 os.environ['NVIDIA_API_KEY'] = str(os.getenv("NVIDIA_API_KEY"))
 
-# Load the language model (LLM)
-llm = ChatNVIDIA(model='meta/llama3-70b-instruct')
+# Check if GPU is available (using PyTorch for simplicity)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Define judge LLM (the model that evaluates responses)
-judge_llm = ChatNVIDIA(model='meta/llama3-70b-instruct')
+# Load the language model (LLM) and ensure it's using the GPU
+# Assuming NVIDIAEmbeddings and ChatNVIDIA models support device argument, if not you can manually handle this in the model loading
+llm = ChatNVIDIA(model='meta/llama3-70b-instruct').to(device)
+
+# Define judge LLM (the model that evaluates responses) and move it to GPU if available
+judge_llm = ChatNVIDIA(model='meta/llama3-70b-instruct').to(device)
 
 # Function to load, split, and vectorize PDFs
 def vector_embedding():
     if "vectors" not in st.session_state:
         # Create embeddings
-        st.session_state.embeddings = NVIDIAEmbeddings()
+        st.session_state.embeddings = NVIDIAEmbeddings(device=device)
         # Read in directory
         st.session_state.loader = PyPDFDirectoryLoader("./documents")
         # Load in documents
